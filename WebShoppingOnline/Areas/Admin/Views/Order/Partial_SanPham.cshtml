@@ -1,0 +1,32 @@
+﻿@model IEnumerable<WebShoppingOnline.Models.EF.OrderDetail>
+@{
+    var i = 1;
+}
+@if (Model != null && Model.Any())
+{
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Tên sản phẩm</th>
+                <th>Số lượng</th>
+                <th>Giá</th>
+                <th>Thành tiền</th>
+            </tr>
+        </thead>
+        <tbody>
+
+
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@(i++)</td>
+                    <td>@item.Product.Title</td>
+                    <td>@item.Quantity</td>
+                    <td>@(WebShoppingOnline.Common.Common.FormatNumber(item.Price,0))</td>
+                    <td>@(WebShoppingOnline.Common.Common.FormatNumber(item.Price*item.Quantity,0))</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

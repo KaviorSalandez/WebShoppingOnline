@@ -1,0 +1,29 @@
+﻿@model IEnumerable<WebShoppingOnline.Models.ShoppingCartItem>
+
+
+@if (Model != null && Model.Any())
+{
+    <h3>Giỏ hàng <span style="float:right;color:forestgreen">(@Model.Count())</span></h3>
+    var i = 0;
+    var tongTien = decimal.Zero;
+    <table class="table" style="border:1px solid #808080">
+        @foreach (var item in Model)
+        {
+            tongTien += item.PriceTotal;
+            <tr>
+                <td>@item.ProductName</td>
+                <td>x @item.Quantity</td>
+                <td>@WebShoppingOnline.Common.Common.FormatNumber(item.Price, 0)</td>
+            </tr>
+        }
+        <tr>
+            <td style="font-weight:bold">Tổng tiền</td>
+            <td></td>
+            <td style="font-weight:bold">@WebShoppingOnline.Common.Common.FormatNumber(tongTien, 0)</td>
+        </tr>
+    </table>
+}
+else
+{
+
+}

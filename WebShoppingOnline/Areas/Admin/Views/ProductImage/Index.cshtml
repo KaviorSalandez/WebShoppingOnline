@@ -1,0 +1,142 @@
+﻿@model IEnumerable<WebShoppingOnline.Models.EF.ProductImage>
+
+
+@{
+    ViewBag.Title = "Ảnh sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutEmpty.cshtml";
+}
+<style>
+    .galeryImage {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+        .galeryImage li {
+            display: inline-block;
+            position: relative;
+        }
+
+    .box-btn {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        text-align: center;
+    }
+</style>
+
+
+<section class="content">
+
+    <!-- Default box -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"></h3>
+
+            <div class="card-tools">
+                <input type="button" value="Tải ảnh" class="btn btn-sm btn-success" onclick="BrowseServer('txtImage');" />
+            </div>
+        </div>
+        <div class="card-body">
+            <ul class="galeryImage" style="height:auto">
+                @if (Model != null)
+                {
+                    foreach (var item in Model)
+                    {
+                        <li id="trow_@item.Id" style="margin:5px;">
+                            <img src="@item.Image" width="180px" height="180px" style="border:1px solid #0094ff" />
+                            <div class="box-btn">
+                                @if (item.IsDefault)
+                                {
+                                    <a href="#" data-id="@item.Id" class="btn btn-sm btn-outline-success btnDefault"><i class="fa fa-check"></i></a>
+
+                                }
+                                else
+                                {
+                                    <a href="#" data-id="@item.Id" class="btn btn-sm btn-outline-danger btnDefault">X</a>
+
+                                }
+                                <a href="#" data-id="@item.Id" class="btn btn-sm btn-outline-danger btnDelete"><i class="fa fa-trash"></i></a>
+
+                            </div>
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+        <!-- /.card-body -->
+        <div class="card-footer">
+        </div>
+        <!-- /.card-footer-->
+    </div>
+    <!-- /.card -->
+
+</section>
+
+<script>
+    $(document).ready(function () {
+       
+        $(".btnDelete").click(function () {
+            var id = $(this).data('id');
+            var conf = confirm('Bạn có muốn xóa bức ảnh này không ?');
+            if (conf === true) {
+                $.ajax({
+                    url: '/Admin/ProductImage/Delete',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function (rs) {
+                        if (rs.Success) {
+                            $('#trow_' + id).remove();
+                        }
+                    }
+                });
+            }
+        })
+
+        $(".btnDefault").click(function (e) {
+            e.preventDefault();
+            var id = $(this).data('id');
+            var conf = confirm('Bạn có muốn để bức ảnh này thành mặc định ko?');
+            if (conf === true) {
+                $.ajax({
+                    url: '/Admin/ProductImage/ChangeImageDefault',
+                    type: 'POST',
+                    data: { idProduct: @ViewBag.ProductID, id: id },
+                    success: function (rs) {
+                        if (rs.Success) {
+                            window.location.reload();
+                        }
+                    }
+                });
+            }
+        });
+
+
+    });
+
+    function AddImage(id, url) {
+            $.ajax({
+                url: '/Admin/ProductImage/AddImage',
+                type: 'POST',
+                data: { id: id, url: url },
+                success: function (rs) {
+                    if (rs.Success) {
+                        window.location.reload();
+                    }
+                }
+            });
+    }
+
+    function BrowseServer(field) {
+        var finder = new CKFinder();
+        finder.selectActionFunction = function (fileUrl) {
+            AddImage(@ViewBag.ProductID, fileUrl);
+        };
+        finder.popup();
+    }
+
+      
+    
+
+</script>

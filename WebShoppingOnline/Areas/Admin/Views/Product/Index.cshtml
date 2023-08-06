@@ -1,0 +1,352 @@
+﻿@model PagedList.PagedList<WebShoppingOnline.Models.EF.Product>
+@using PagedList.Mvc;
+@using PagedList;
+@{
+    ViewBag.Title = "Danh sách sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+
+@* Ứng với mỗi trang thì đều có thanh điều hướng khác nhau nên dùng RenderSection *@
+@section naviheader{
+    <!-- Left navbar links -->
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
+            <a href="/Admin/Home" class="nav-link">Trang chủ</a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
+            <a href="/Admin/Product" class="nav-link">@ViewBag.Title</a>
+        </li>
+    </ul>
+}
+@* đây là link css cho mục quản lí ảnh *@
+<link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>Quản lý sản phẩm</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Admin/Home">Trang chủ</a></li>
+                    <li class="breadcrumb-item active">Sản phẩm</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+
+    <!-- Default box -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">@ViewBag.Title</h3>
+
+            <div class="card-tools">
+                <a href="/Admin/Product/Create" class="btn btn-primary">Thêm mới</a>
+                <a href="/Admin/Product/DeleteAll" class="btn btn-default" id="BtnDeleteAll">Xóa tất cả</a>
+            </div>
+        </div>
+        <div class="card-body">
+            @*<div class="row">
+                    <div class="col-md-6">
+
+                        @using (Html.BeginForm("Index", "Post", FormMethod.Get, new { }))
+                        {
+                            <div class="input-group input-group-sm">
+                                @Html.TextBox("searchText")
+                                <span class="input-group-append">
+                                    <button type="submit" class="btn btn-info btn-flat">
+                                        Tìm kiếm!
+                                    </button>
+                                </span>
+                            </div>
+                        }
+                    </div>
+                </div>*@
+
+
+            <table class="table table-hover">
+                <thead>
+                <th>
+                    <input type="checkbox" id="SelectAll" />
+                </th>
+                <th>STT</th>
+                <th>Hình ảnh</th>
+                <th>Tên sản phẩm</th>
+                <th>Danh mục sản phẩm</th>
+                <th>Số lượng</th>
+                <th>Giá</th>
+                <th>Ngày tạo</th>
+                <th>Hiển thị</th>
+                <th>Home</th>
+                <th>BestSale</th>
+                <th>Hành động</th>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        var i = ((ViewBag.Page - 1) * ViewBag.PageSize) + 1;
+                        foreach (var item in Model)
+                        {
+                            var strCheck = item.IsActive ? "<i class='fa fa-check text-success'></i" : "<i class='fa fa-times text-danger'></i>";
+                            var strCheckHome = item.IsHome ? "<i class='fa fa-check text-success'></i" : "<i class='fa fa-times text-danger'></i>";
+                            var strCheckBestSale = item.IsSale ? "<i class='fa fa-check text-success'></i" : "<i class='fa fa-times text-danger'></i>";
+                            var strImg = "";
+                            var checkImg = item.ProductImage.FirstOrDefault(x => x.IsDefault);
+                            if (checkImg.Image != null)
+                            {
+                                strImg = checkImg.Image;
+                            }
+                            <tr id="trow_@item.Id">
+                                <td>
+                                    <input type="checkbox" class="cbkItem" value="@item.Id" />
+                                </td>
+                                <td>@i</td>
+                                <td><img  id="imgproduct" data-id="@item.Id" src="@strImg" height="80px" width="80px" /></td>
+                                <td>@item.Title</td>
+                                <td>@item.ProductCategory.Title</td>
+                                <td>@item.Quantity</td>
+                                <td>@string.Format("{0:#,0}", item.Price) đ</td>
+                                <td>@item.CreatedDate.ToString("dd/MM/yyyy")</td>
+                                <td class="text-center">
+                                    <a href="#" data-id="@item.Id" class="btnActive">@Html.Raw(strCheck)</a>
+                                </td>
+                                <td class="text-center">
+                                    <a href="#" data-id="@item.Id" class="btnHome">@Html.Raw(strCheckHome)</a>
+                                </td>
+                                <td class="text-center">
+                                    <a href="#" data-id="@item.Id" class="btnSale">@Html.Raw(strCheckBestSale)</a>
+                                </td>
+                                <td>
+                                    <a href="/Admin/Product/Edit?id=@item.Id" class="btn btn-sm btn-warning">Edit</a>
+                                    <a href="#" data-id="@item.Id" class="btn btn-sm btn-danger btnDelete">Delete</a>
+                                </td>
+                            </tr>
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4">Không có bản ghi nào</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div class="row">
+                <div class="col-md-5"></div>
+                <div class="col-md-7" style="text-align:right">
+                    @Html.PagedListPager(Model, page => Url.Action("Index", new { page }))
+                </div>
+            </div>
+        </div>
+        <!-- /.card-body -->
+        <div class="card-footer">
+        </div>
+        <!-- /.card-footer-->
+    </div>
+    <!-- /.card -->
+
+    <div id="dialog">
+        <iframe id="myIframe" style="border:0 ;width: 100%; height: 100%"></iframe>
+    </div>
+
+</section>
+<!-- /.content -->
+@section scripts{
+    @* đây là thư viên js cho quản lí ảnh *@
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <script>
+        $(document).ready(function () {
+            //hiển thị form dialog để quản lí và chọn ảnh khác
+            $("#dialog").dialog({
+                autoOpen: false,
+                show: "fade",
+                hide: "fade",
+                modal: "true",
+                height: '550',
+                width: '700',
+                resizable: true,
+                title: 'Quản lí ảnh sản phẩm',
+                close: function () {
+                    window.location.reload();
+                }
+            });
+
+           
+
+                $('body').on("click", "#imgproduct", function () {
+                    var proid = $(this).attr("data-id");
+                    $("#dialog #myIframe").attr("src", "/Admin/ProductImage/Index?productId="+proid);
+                    $('#dialog').dialog('open');
+                    return false;
+                });
+
+
+
+
+
+
+            $('body').on('click', '#BtnDeleteAll', function (e) {
+                e.preventDefault();
+                var str = "";
+                var checkBox = $(this).parents('.card').find('tr td input:checkbox');
+                var i = 0;
+                checkBox.each(function () {
+                    if (this.checked) {
+                        checkBox.attr('selected', 'checked');
+                        var _id = $(this).val();
+                        if (i === 0) {
+                            str += _id;
+                        } else {
+                            str += "," + _id;
+                        }
+                        i++;
+                    } else {
+                        checkBox.attr('selected', '');
+                    }
+                });
+                //alert(str);
+                if (str.length > 0) {
+                    var conf = confirm("Bạn có muốn xóa nhứng bản ghi này không ?");
+                    if (conf === true) {
+                        // ở đây sẽ dùng ajax
+                        $.ajax({
+                            url: '/Admin/Product/DeleteAll',
+                            type: 'Post',
+                            data: { ids: str },
+                            success: function (rs) {
+                                if (rs.success) {
+                                    //load lại trang
+                                    location.reload();
+                                }
+                            }
+
+                        });
+                    }
+                }
+            });
+
+            $('body').on('change', '#SelectAll', function () {
+                // alert("ok chưa");
+                // khai báo 1 biến để check trạng thái của thằng này
+                var checkStatus = this.checked;
+                //alert(checkStatus);
+                var checkBox = $(this).parents('.card-body').find('tr td input:checkbox');
+                checkBox.each(function () {
+                    this.checked = checkStatus;
+                    if (this.checked) {
+                        checkBox.attr('selected', 'checked');
+                    } else {
+                        checkBox.attr('selected', '');
+                    }
+                });
+            });
+
+            $('body').on('click', '.btnDelete', function () {
+                var id = $(this).data("id");
+                var conf = confirm("Bạn có muốn xóa bản ghi này không?");
+                if (conf === true) {
+                    $.ajax({
+                        url: '/Admin/Product/Delete',
+                        type: 'Post',
+                        data: { id: id },
+                        success: function (rs) {
+                            if (rs.success) {
+                                $('#trow_' + id).remove();
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
+        //// kích hoạt trạng thái bằng Ajax
+        //$(document).ready(function () {
+        //    $('body').on('click', '.btnActive', function (e) {
+        //        e.preventDefault();
+        //        debugger;
+        //        var btn = $(this);
+        //        var id = $(this).data("id");
+        //        $.ajax({
+        //            url: '/Admin/Product/ChangeActive1',
+        //            type: 'Post',
+        //            data: { id: id },
+        //            success: function (rs) {
+        //                if (rs.success) {
+        //                    if (rs.isActive) {
+        //                        btn.html("<i class='fa fa-check text-success'></i>")
+        //                    }
+        //                    else {
+        //                        btn.html("<i class='fa fa-times text-danger'></i>")
+        //                    }
+        //                }
+        //            }
+        //        });
+        //    });
+        //});
+
+
+
+        // kích hoạt hiển thị ở trang home bằng Ajax
+        $(document).ready(function () {
+            $('body').on('click', '.btnHome', function (e) {
+                e.preventDefault();
+                debugger
+                var btn = $(this);
+                var id = $(this).data("id");
+                $.ajax({
+                    url: '/Admin/Product/ChangeIsHome',
+                    type: 'Post',
+                    data: { id: id },
+                    success: function (rs) {
+                        if (rs.success) {
+                            if (rs.isHome) {
+                                btn.html("<i class='fa fa-check text-success'></i>")
+                            }
+                            else {
+                                btn.html("<i class='fa fa-times text-danger'></i>")
+                            }
+                        }
+                    }
+
+                });
+            });
+        })
+        // kích hoạt hiển thị ở section best sale bằng Ajax
+        $(document).ready(function () {
+            $('body').on('click', '.btnSale', function (e) {
+                e.preventDefault();
+                debugger
+                var btn = $(this);
+                var id = $(this).data("id");
+                $.ajax({
+                    url: '/Admin/Product/ChangeIsSale',
+                    type: 'Post',
+                    data: { id: id },
+                    success: function (rs) {
+                        if (rs.success) {
+                            if (rs.isSale) {
+                                btn.html("<i class='fa fa-check text-success'></i>")
+                            }
+                            else {
+                                btn.html("<i class='fa fa-times text-danger'></i>")
+                            }
+                        }
+                    }
+
+                });
+            });
+        })
+
+    </script>
+}

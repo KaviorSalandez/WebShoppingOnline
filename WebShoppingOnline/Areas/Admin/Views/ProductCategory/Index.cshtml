@@ -1,0 +1,233 @@
+﻿@model IEnumerable<WebShoppingOnline.Models.EF.ProductCategory>
+@{
+    ViewBag.Title = "Danh mục sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+@section naviheader{
+    <!-- Left navbar links -->
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
+            <a href="/Admin/Home" class="nav-link">Trang chủ</a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
+            <a href="/Admin/ProductCategory" class="nav-link">@ViewBag.Title</a>
+        </li>
+    </ul>
+}
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>Quản lý danh mục sản phẩm</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Admin/Home">Trang chủ</a></li>
+                    <li class="breadcrumb-item active">Danh mục - Sản phẩm</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+
+    <!-- Default box -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">@ViewBag.Title</h3>
+
+            <div class="card-tools">
+                <a href="/Admin/ProductCategory/Create" class="btn btn-primary">Thêm mới</a>
+                <a href="/Admin/ProductCategory/DeleteAll" class="btn btn-default" id="BtnDeleteAll">Xóa tất cả</a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+
+                    @using (Html.BeginForm("Index", "ProductCategory", FormMethod.Get, new { }))
+                    {
+                        <div class="input-group input-group-sm">
+                            @Html.TextBox("searchText")
+                            <span class="input-group-append">
+                                <button type="submit" class="btn btn-info btn-flat">
+                                    Tìm kiếm!
+                                </button>
+                            </span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+
+            <table class="table table-hover">
+                <thead>
+                <th>
+                    <input type="checkbox" id="SelectAll" />
+                </th>
+                <th>STT</th>
+                <th>Tiêu đề</th>
+                <th>Mô tả</th>
+                <th>Icon</th>
+                <th>Ngày tạo</th>
+                <th>Hành động</th>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        var i = 1;
+                        foreach (var item in Model)
+                        {
+                            <tr id="trow_@item.Id">
+                                <td>
+                                    <input type="checkbox" class="cbkItem" value="@item.Id" />
+                                </td>
+                                <td>@i</td>
+
+                                <td>@item.Title</td>
+                                <td>@item.Description</td>
+                                <td><img src="@item.Icon" alt="Image" height="80px" width="80px" /></td>
+                                <td>@item.CreatedDate.ToString("dd/MM/yyyy")</td>
+                              
+                                <td>
+                                    <a href="/Admin/ProductCategory/Edit?id=@item.Id" class="btn btn-sm btn-warning">Edit</a>
+                                    <a href="#" data-id="@item.Id" class="btn btn-sm btn-danger btnDelete">Delete</a>
+                                </td>
+                            </tr>
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4">Không có bản ghi nào</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            @*<div class="row">
+                <div class="col-md-5"></div>
+                <div class="col-md-7" style="text-align:right">
+                    @Html.PagedListPager(Model, page => Url.Action("Index", new { page }))
+                </div>
+            </div>*@
+        </div>
+        <!-- /.card-body -->
+        <div class="card-footer">
+        </div>
+        <!-- /.card-footer-->
+    </div>
+    <!-- /.card -->
+
+</section>
+<!-- /.content -->
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            $('body').on('click', '#BtnDeleteAll', function (e) {
+                e.preventDefault();
+                var str = "";
+                var checkBox = $(this).parents('.card').find('tr td input:checkbox');
+                var i = 0;
+                checkBox.each(function () {
+                    if (this.checked) {
+                        checkBox.attr('selected', 'checked');
+                        var _id = $(this).val();
+                        if (i === 0) {
+                            str += _id;
+                        } else {
+                            str += "," + _id;
+                        }
+                        i++;
+                    } else {
+                        checkBox.attr('selected', '');
+                    }
+                });
+                //alert(str);
+                if (str.length > 0) {
+                    var conf = confirm("Bạn có muốn xóa nhứng bản ghi này không ?");
+                    if (conf === true) {
+                        // ở đây sẽ dùng ajax
+                        $.ajax({
+                            url: '/Admin/ProductCategory/DeleteAll',
+                            type: 'Post',
+                            data: { ids: str },
+                            success: function (rs) {
+                                if (rs.success) {
+                                    //load lại trang
+                                    location.reload();
+                                }
+                            }
+
+                        });
+                    }
+                }
+            });
+
+            $('body').on('change', '#SelectAll', function () {
+                // alert("ok chưa");
+                // khai báo 1 biến để check trạng thái của thằng này
+                var checkStatus = this.checked;
+                //alert(checkStatus);
+                var checkBox = $(this).parents('.card-body').find('tr td input:checkbox');
+                checkBox.each(function () {
+                    this.checked = checkStatus;
+                    if (this.checked) {
+                        checkBox.attr('selected', 'checked');
+                    } else {
+                        checkBox.attr('selected', '');
+                    }
+                });
+            });
+
+            $('body').on('click', '.btnDelete', function () {
+                var id = $(this).data("id");
+                var conf = confirm("Bạn có muốn xóa bản ghi này không?");
+                if (conf === true) {
+                    $.ajax({
+                        url: '/Admin/ProductCategory/Delete',
+                        type: 'Post',
+                        data: { id: id },
+                        success: function (rs) {
+                            if (rs.success) {
+                                $('#trow_' + id).remove();
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
+        // kích hoạt trạng thái bằng Ajax
+        $(document).ready(function () {
+            $('body').on('click', '.btnActive', function (e) {
+                e.preventDefault();
+                debugger;
+                var btn = $(this);
+                var id = $(this).data("id");
+                $.ajax({
+                    url: '/Admin/ProductCategory/ChangeActive1',
+                    type: 'Post',
+                    data: { id: id },
+                    success: function (rs) {
+                        if (rs.success) {
+                            if (rs.isActive) {
+                                btn.html("<i class='fa fa-check text-success'></i>")
+                            }
+                            else {
+                                btn.html("<i class='fa fa-times text-danger'></i>")
+                            }
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}
+

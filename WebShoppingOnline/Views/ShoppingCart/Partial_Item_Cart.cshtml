@@ -1,0 +1,65 @@
+﻿@model IEnumerable<WebShoppingOnline.Models.ShoppingCartItem>
+
+<table class="table">
+    <tr class="text-center">
+        <th>STT</th>
+        <th>Ảnh sản phẩm</th>
+        <th width="150px">Tên sản phẩm</th>
+        <th>Tên danh mục</th>
+        <th>Giá </th>
+        <th width="120px">Số lượng</th>
+        <th>Thành tiền</th>
+        <th>
+            Thao tác
+        </th>
+    </tr>
+    @if (Model != null && Model.Any())
+    {
+        var i = 1;
+        var tongTien = decimal.Zero;
+        foreach (var item in Model)
+        {
+            tongTien += item.PriceTotal;
+            <tr class="text-center" id="trow_@item.ProductId">
+                <td>@(i++)</td>
+                <td><img src="@item.ProductImage" height="100px" width="100px" /></td>
+                <td width="150px"><a href="/detail/@item.Alias-p@(item.ProductId)">@item.ProductName</a></td>
+                <td>@item.CategoryName</td>
+                <td>@WebShoppingOnline.Common.Common.FormatNumber(item.Price, 0)</td>
+                <td width="120px">
+                    <input type="number" min="1" value="@item.Quantity" style="text-align:center" class="form-control" id="Quantity_@item.ProductId" />
+                </td>
+                <td>@WebShoppingOnline.Common.Common.FormatNumber(item.PriceTotal, 0)</td>
+                <td style="text-align:right">
+                    <a href="#" class="btn btn-sm btn-danger btnDeleteItem" data-id="@item.ProductId">
+                        Xóa
+                    </a>
+                    <a href="#"  class="btn btn-sm btn-info btnUpdateItem" data-id="@item.ProductId">
+                        Cập nhật
+                    </a>
+                </td>
+            </tr>
+        }
+        <tr>
+            <td colspan="6" class="text-right" style="font-weight:bold">Tổng tiền:</td>
+            <td class="text-center"  style="font-weight:bold">@WebShoppingOnline.Common.Common.FormatNumber(tongTien, 0)</td>
+            <td></td>
+
+        </tr>
+
+        <tr>
+            <td colspan="7" class="text-right"></td>
+            <td style="text-align:right">
+                <a href="#" class="btn btn-sm btn-danger btnDeleteAllItem">Xóa</a>
+                <a href="/thanh-toan" class="btn btn-sm btn-success" >Thanh toán</a>
+            </td>
+        </tr>
+    }
+    else
+    {
+        <tr class="text-center">
+            <th colspan="7">Không có sản phẩm nào trong giỏ hàng</th>
+        </tr>
+    }
+</table>
+
